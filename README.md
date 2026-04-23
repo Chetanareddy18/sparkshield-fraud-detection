@@ -91,8 +91,10 @@ Fraud_Detection/
 │   ├── powerbi_export.py         # KPI + fact-table CSVs for Power BI
 │   ├── kafka_producer.py         # Simulated live feed → Kafka topic
 │   ├── kafka_consumer.py         # Spark Structured Streaming scorer
+│   ├── build_dashboard.py        # Interactive (Power BI-style) HTML
 │   ├── predict.py                # Single-transaction inference
 │   └── main.py                   # End-to-end pipeline entry point
+├── docker-compose.yml            # Local Kafka + Kafka-UI stack
 ├── dashboard.py                  # Streamlit UI
 ├── requirements.txt
 └── README.md
@@ -201,18 +203,36 @@ others are pre-aggregated dimension/KPI tables.
 
 ### Real-time scoring with Kafka + Spark Structured Streaming
 
-```bash
-# 1. Start a local Kafka broker on localhost:9092 (e.g. via docker-compose).
-# 2. Stream the dataset into Kafka:
-python src/kafka_producer.py --topic transactions --rate 50 --limit 10000
+A ready-to-run Kafka stack is included via `docker-compose.yml` (single-node
+Apache Kafka in KRaft mode + Kafka-UI).
 
-# 3. In a second terminal, run the streaming scorer
-#    (auto-pulls the spark-sql-kafka package on first run):
+```bash
+# 1. Start Kafka + Kafka UI
+docker compose up -d
+#    Kafka broker  -> localhost:9092
+#    Kafka UI      -> http://localhost:8080
+
+# 2. Stream the dataset into Kafka
+python src/kafka_producer.py --topic transactions --rate 50 --limit 5000
+
+# 3. In another terminal, run the streaming scorer
 python src/kafka_consumer.py
 ```
 
 Scored events are appended to `results/stream_predictions/` (CSV) and
-echoed to the console.
+echoed to the console. You can watch the messages flow live in
+**Kafka-UI** at <http://localhost:8080>.
+
+### Build the interactive (Power BI–style) dashboard
+
+```bash
+python src/build_dashboard.py
+# -> results/dashboard.html  (open in any browser)
+```
+
+A self-contained, single-file HTML report (KPIs, donut, stacked bars,
+risk levels, fraud-rate-by-amount-bucket) styled to look like Power BI.
+Useful when you don't have Power BI Desktop handy.
 
 ### Launch the Streamlit dashboard
 

@@ -56,6 +56,9 @@ fraud_predictions/
 results/stream_predictions/
 results/stream_checkpoint/
 
+# Generated browser dashboard (rebuild via src/build_dashboard.py)
+results/dashboard.html
+
 # Keep generated graphs and small Power BI summaries
 !results/graphs/
 !results/graphs/*.png
