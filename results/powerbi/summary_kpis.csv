@@ -1,0 +1,2 @@
+total_transactions,predicted_fraud,fraud_rate_%,high_risk_transactions,medium_risk_transactions,total_amount,fraud_amount,avg_fraud_amount
+6362620,8182,0.1286,8181,1,1144392944759.77,12044676972.39,1472094.4723038375

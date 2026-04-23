@@ -52,9 +52,18 @@ results/high_value_fraud/
 results/account_drained_cases/
 fraud_predictions/
 
-# Keep generated graphs
+# Streaming pipeline outputs
+results/stream_predictions/
+results/stream_checkpoint/
+
+# Keep generated graphs and small Power BI summaries
 !results/graphs/
 !results/graphs/*.png
+!results/powerbi/
+!results/powerbi/*.csv
+
+# But exclude the large fact table from Power BI exports
+results/powerbi/transactions_scored.csv
 
 # ==============================
 # Logs

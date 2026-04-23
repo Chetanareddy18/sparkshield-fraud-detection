@@ -12,8 +12,9 @@ An end-to-end **Big Data fraud detection pipeline** built with **Apache Spark ML
 - **Three trained classifiers** — Logistic Regression, Random Forest, and Gradient Boosted Trees (best model used for inference).
 - **Behavioral feature engineering** — `balanceError`, `destBalanceError`, `highValueTransaction`, `accountDrained`.
 - **Risk Scoring Engine** — converts model probabilities to a 0–100 risk score and Low/Medium/High risk tiers.
-- **Streamlit dashboard** for single-transaction fraud screening.
-- **Batch export pipeline** writing predictions to CSV for BI tools (Power BI ready).
+- **Streamlit dashboard** with two pages — live single-transaction screening (uses the real Spark GBT model when available, with a rules-based fallback) and a batch analytics view.
+- **Kafka + Spark Structured Streaming** — `kafka_producer.py` simulates a live transaction feed and `kafka_consumer.py` scores it in real time using the saved GBT model.
+- **Power BI ready exports** — `powerbi_export.py` produces compact, single-file CSVs (KPIs, fraud-by-type, risk levels, amount buckets, scored fact table) for direct import into Power BI / Excel / Tableau.
 - **Reproducible artifacts** — saved Spark ML models in `models/` and analytics graphs in `results/graphs/`.
 
 ---
@@ -87,6 +88,9 @@ Fraud_Detection/
 │   ├── risk_scoring.py           # Probability → risk score / level
 │   ├── visualization.py          # Pandas/Matplotlib graphs
 │   ├── export_predictions.py     # Batch predictions → CSV
+│   ├── powerbi_export.py         # KPI + fact-table CSVs for Power BI
+│   ├── kafka_producer.py         # Simulated live feed → Kafka topic
+│   ├── kafka_consumer.py         # Spark Structured Streaming scorer
 │   ├── predict.py                # Single-transaction inference
 │   └── main.py                   # End-to-end pipeline entry point
 ├── dashboard.py                  # Streamlit UI
@@ -184,6 +188,32 @@ python src/visualization.py
 
 PNG charts are written to `results/graphs/`.
 
+### Export Power BI ready data
+
+```bash
+python src/export_predictions.py    # produces fraud_predictions/
+python src/powerbi_export.py        # produces results/powerbi/*.csv
+```
+
+In Power BI: **Get Data → Folder → `results/powerbi/`** and load the
+five CSVs. The `transactions_scored.csv` file is the fact table; the
+others are pre-aggregated dimension/KPI tables.
+
+### Real-time scoring with Kafka + Spark Structured Streaming
+
+```bash
+# 1. Start a local Kafka broker on localhost:9092 (e.g. via docker-compose).
+# 2. Stream the dataset into Kafka:
+python src/kafka_producer.py --topic transactions --rate 50 --limit 10000
+
+# 3. In a second terminal, run the streaming scorer
+#    (auto-pulls the spark-sql-kafka package on first run):
+python src/kafka_consumer.py
+```
+
+Scored events are appended to `results/stream_predictions/` (CSV) and
+echoed to the console.
+
 ### Launch the Streamlit dashboard
 
 ```bash
@@ -230,18 +260,22 @@ risk_level    = Low Risk      (score ≤ 40)
 
 Generated charts in `results/graphs/`:
 
-- `fraud_vs_nonfraud.png`
-- `risk_level_distribution.png`
-- `fraud_probability_distribution.png`
-- `risk_score_distribution.png`
-- `model_comparison.png`
+- `summary_panel.png` — 4-quadrant executive summary
+- `fraud_vs_nonfraud.png` — class imbalance (linear + log)
+- `fraud_by_transaction_type.png` — counts and fraud-rate by payment type
+- `fraud_probability_distribution.png` — full range + zoomed high-risk tail
+- `risk_level_distribution.png` — Low/Medium/High risk counts + score histogram
+- `risk_score_distribution.png` — risk score (0–100, log)
+- `amount_distribution_by_class.png` — log-log amount distribution by predicted class
+- `model_comparison.png` — AUC-ROC across LR / RF / GBT
 
 ---
 
 ## Roadmap
 
 - [ ] SHAP-based explainability for flagged transactions
-- [ ] Streaming inference with Spark Structured Streaming + Kafka
+- [x] Streaming inference with Spark Structured Streaming + Kafka
+- [x] Power BI ready exports
 - [ ] REST API (FastAPI) wrapping the GBT model
 - [ ] Containerization (Docker) and CI/CD
 - [ ] Auto-retraining workflow with MLflow tracking
