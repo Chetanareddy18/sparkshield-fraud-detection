@@ -1,0 +1,68 @@
+# ==============================
+# Python
+# ==============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.Python
+build/
+dist/
+
+# ==============================
+# Virtual Environments
+# ==============================
+venv/
+env/
+.venv/
+.env
+
+# ==============================
+# IDE / Editor
+# ==============================
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# ==============================
+# Spark / Hadoop
+# ==============================
+spark-warehouse/
+metastore_db/
+derby.log
+*.crc
+._SUCCESS.crc
+.part-*.crc
+
+# ==============================
+# Project Data (large files)
+# ==============================
+data/*.csv
+data/*.parquet
+data/*.json
+
+# Spark output folders (large parquet/csv parts)
+results/processed_transactions/
+results/final_risk_scores/
+results/fraud_vs_normal/
+results/fraud_by_type/
+results/high_value_fraud/
+results/account_drained_cases/
+fraud_predictions/
+
+# Keep generated graphs
+!results/graphs/
+!results/graphs/*.png
+
+# ==============================
+# Logs
+# ==============================
+*.log
+logs/
+
+# ==============================
+# Jupyter
+# ==============================
+.ipynb_checkpoints/
