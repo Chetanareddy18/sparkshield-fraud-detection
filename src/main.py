@@ -4,8 +4,9 @@ import sys
 # =============================
 # FIX PYSPARK PYTHON PATH
 # =============================
-os.environ["PYSPARK_PYTHON"] = r"C:\Users\Chetana\OneDrive\Desktop\DAV_LAB\venv\Scripts\python.exe"
-os.environ["PYSPARK_DRIVER_PYTHON"] = r"C:\Users\Chetana\OneDrive\Desktop\DAV_LAB\venv\Scripts\python.exe"
+# Use the current interpreter so Spark workers match the driver environment.
+os.environ.setdefault("PYSPARK_PYTHON", sys.executable)
+os.environ.setdefault("PYSPARK_DRIVER_PYTHON", sys.executable)
 
 # allow imports from project root
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

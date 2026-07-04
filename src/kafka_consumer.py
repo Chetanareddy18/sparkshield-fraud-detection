@@ -26,10 +26,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT))
 
+# Force workers to use the SAME interpreter as the driver to avoid
+# Spark's PYTHON_VERSION_MISMATCH error.
+os.environ.setdefault("PYSPARK_PYTHON", sys.executable)
+os.environ.setdefault("PYSPARK_DRIVER_PYTHON", sys.executable)
+
 # Convenience: auto-add the Kafka package if not already configured.
 PKG = os.environ.get(
     "SPARK_KAFKA_PACKAGE",
-    "org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1",
+    "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1",
 )
 os.environ["PYSPARK_SUBMIT_ARGS"] = (
     f"--packages {PKG} pyspark-shell"
